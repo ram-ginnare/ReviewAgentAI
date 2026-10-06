@@ -1,0 +1,18 @@
+class ReviewSessionStatus:
+    STARTED = "started"
+    RATE = "rate"
+    RATED = "rated"
+    POSITIVE_REVIEW = "positive_review"
+    PRIVATE_FEEDBACK = "private_feedback"
+    COMPLETED = "completed"
+    EXPIRED = "expired"
+
+
+class ReviewEventType:
+    LANDING_PAGE_VIEW = "LANDING_PAGE_VIEW"
+    RATING_SELECTED = "RATING_SELECTED"
+    AI_REVIEWS_GENERATED = "AI_REVIEWS_GENERATED"
+    PRIVATE_FEEDBACK_SUBMITTED = "PRIVATE_FEEDBACK_SUBMITTED"
+    REVIEW_SELECTED = "REVIEW_SELECTED"
+    GOOGLE_HANDOFF = "GOOGLE_HANDOFF"
+    SOCIAL_LINK_CLICKED = "SOCIAL_LINK_CLICKED"

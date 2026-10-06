@@ -1,0 +1,260 @@
+reviewagentai - Steps to Run Locally
+===================================
+
+1. Open PowerShell and go to the project folder
+------------------------------------------------
+cd C:\Users\DELL\IdeaProjects\reviewagentai
+
+2. Create the Python virtual environment (.venv)
+--------------------------------------------------
+If .venv does not exist:
+
+python -m venv .venv
+
+3. Activate .venv
+-----------------
+.\.venv\Scripts\Activate.ps1
+
+You should see (.venv) at the beginning of the PowerShell prompt.
+
+If PowerShell blocks activation, run PowerShell with the appropriate local
+execution policy or activate the environment from VS Code's Python environment selector.
+
+4. Install requirements.txt
+---------------------------
+With (.venv) active:
+
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+5. Add the Groq API key
+-----------------------
+Create or update the .env file in the project root:
+
+APP_ENV=development
+DATABASE_URL=sqlite:///./reviewagentai.db
+CORS_ORIGINS=http://localhost:5173
+GROQ_API_KEY=YOUR_GROQ_API_KEY
+GROQ_MODEL=openai/gpt-oss-120b
+REVIEW_SESSION_TIMEOUT_MINUTES=30
+
+Never commit .env to Git and never share the API key in chat, screenshots, logs,
+or source control.
+
+6. Test the Groq API key and model
+-----------------------------------
+Make sure TestGroq.py is in the project root, then run:
+
+python TestGroq.py
+
+A successful result should contain:
+
+RESULT: SUCCESS - Groq API request completed
+
+If the result is FAILED, read the diagnosis. In particular, a model_not_found
+error means GROQ_MODEL is invalid or unavailable; it does not necessarily mean
+the API key is invalid.
+
+7. Reset the local SQLite database when schema/seed changes are made
+--------------------------------------------------------------------
+reviewagentai does not use Alembic. During development, delete the local DB
+and let the application recreate tables and seed data:
+
+Remove-Item .\reviewagentai.db -ErrorAction SilentlyContinue
+
+8. Start the FastAPI backend
+----------------------------
+uvicorn backend.app.main:app --reload
+
+Backend:
+http://127.0.0.1:8000
+
+Swagger:
+http://127.0.0.1:8000/docs
+
+9. Run tests
+------------
+In a second PowerShell window, activate .venv and run:
+
+cd C:\Users\DELL\IdeaProjects\reviewagentai
+.\.venv\Scripts\Activate.ps1
+pytest -q
+
+10. Positive review API input
+-----------------------------
+POST /api/v1/reviews/session/{session_id}/positive-reviews
+
+At least one checkbox or the customer comment is required.
+
+Example:
+
+{
+  "professional_staff": true,
+  "reliable_service": false,
+  "good_ambiance": true,
+  "affordable_pricing": false,
+  "customer_comment": "Food was fresh and service was quick"
+}
+
+The API searches the business's database fallback review comments and selects
+the top 3 relevant comments. Fallback comments are complete comments and do
+not contain {customer_input} or any other runtime replacement placeholder.
+
+If PreferAIComments is true, Groq uses the selected preferences, optional
+customer comment, and the matched fallback comments to produce 3 natural
+review options. If Groq fails, the top 3 matched database comments are still
+returned with generation_source=fallback.
+
+If PreferAIComments is false, Groq is not called and the top 3 matched database
+comments are returned with generation_source=fallback.
+
+11. Important: restart the backend after .env changes
+------------------------------------------------------
+If GROQ_API_KEY or GROQ_MODEL is changed, stop the running uvicorn process and
+start it again so the application loads the updated environment values.
+
+11. Google Review PC/Mobile/Tablet URL behavior
+------------------------------------------------
+The Business table now stores two Google review URLs:
+
+- google_review_pc_url  -> desktop/laptop browsers
+- google_review_mob_url -> mobile phones and tablets
+
+For the seeded reviewagentai business, the mobile URL is:
+https://g.page/r/CQXyLImX75mfEBM/review
+
+The Google review selection API detects the browser User-Agent:
+
+Desktop / laptop:
+    returns google_review_pc_url
+
+Mobile phone:
+    returns google_review_mob_url
+
+Tablet (iPad / Android tablet):
+    returns google_review_mob_url
+
+Unknown or missing User-Agent:
+    defaults to google_review_mob_url
+
+The API response also includes the configured PC/mobile URLs, the selected
+review URL, and device_type.
+
+Example desktop test header in Swagger/API client:
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/140.0 Safari/537.36
+
+Example mobile test header:
+User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1
+
+Example tablet test header:
+User-Agent: Mozilla/5.0 (Linux; Android 14; SM-X800) AppleWebKit/537.36 Chrome/140 Safari/537.36
+
+12. Important: reset database after Google URL schema changes
+--------------------------------------------------------------
+Because reviewagentai does not use Alembic, delete the local SQLite database
+when applying this schema change:
+
+Remove-Item .\reviewagentai.db -ErrorAction SilentlyContinue
+
+Then restart the backend so Base.metadata.create_all() recreates the database
+and the seed data creates the new PC/mobile Google review URL columns.
+
+
+PHASE 3.12 BACKEND HARDENING
+=============================
+This version adds session ownership for generated reviews, standardized API error codes, safe request IDs/logging, CORS checks, AI rate limiting, and database constraints/indexes.
+
+Because this project does NOT use Alembic, reset the SQLite database once after replacing the code:
+Remove-Item .\reviewagentai.db -ErrorAction SilentlyContinue
+
+Then start the backend:
+uvicorn backend.app.main:app --reload
+
+AI rate-limit settings in .env are optional:
+AI_RATE_LIMIT_REQUESTS=10
+AI_RATE_LIMIT_WINDOW_SECONDS=60
+
+Run the full test suite:
+pytest -q
+
+PHASE 4.3-4.13 FRONTEND TESTING
+
+1. Backend terminal
+   cd C:\Users\DELL\IdeaProjects\reviewagentai
+   .\.venv\Scripts\Activate.ps1
+   uvicorn backend.app.main:app --reload
+
+2. Frontend terminal
+   cd C:\Users\DELL\IdeaProjects\reviewagentai\frontend
+   npm install
+   npm run dev
+
+3. Open the customer experience
+   http://localhost:5173/r/reviewagentai
+
+4. NFC test
+   http://localhost:5173/r/reviewagentai?source=nfc
+
+5. QR test
+   http://localhost:5173/r/reviewagentai?source=qr
+
+6. Positive flow test
+   Landing -> Share your experience -> 4 or 5 stars -> choose at least one preference and/or comment -> Create review suggestions -> edit/select a suggestion -> Copy & Open Google. Confirm the text is copied and Google opens. The app must not submit the Google review automatically.
+
+7. Negative/private flow test
+   Landing -> Share your experience -> 1, 2, or 3 stars -> enter at least 3 characters -> Send private feedback -> confirm the acknowledgement/success screen. Confirm no Google page is opened.
+
+8. Validation tests
+   Try creating positive suggestions with no checkbox and no comment. The UI must block submission. Try empty private feedback. The UI must block submission.
+
+9. Error tests
+   Open http://localhost:5173/r/not-a-real-business and confirm a friendly error with Try again. Stop the backend and reload a customer page to verify the network error state.
+
+10. Session/resume test
+   Start a flow, refresh the page, and confirm the active session resumes from its backend flow status instead of creating an unnecessary new session.
+
+11. Expired-session test
+   If a session is expired by backend timeout, reload and confirm the UI asks the customer to start again.
+
+12. Social test
+   Click each enabled social link. The external page should open and the SOCIAL_LINK_CLICKED event should be attempted in the background.
+
+13. Responsive test
+   Use Chrome DevTools device emulation for iPhone/Android/tablet and desktop. Confirm buttons are easy to tap, cards fit the screen, textareas are usable, and no horizontal scrolling occurs.
+
+14. Clipboard failure test
+   In a browser/privacy context where clipboard access is denied, Copy & Open Google must show a manual-copy message and must not open Google.
+
+15. Frontend tests
+   cd C:\Users\DELL\IdeaProjects\reviewagentai\frontend
+   npm test
+
+16. Frontend production build
+   npm run build
+
+17. Backend regression test
+   cd C:\Users\DELL\IdeaProjects\reviewagentai
+   pytest -q
+
+PHASE 4 UI DESIGN SYSTEM
+------------------------
+The frontend now uses the selected Modern SaaS / Premium design system. Keep future customer-facing UI changes consistent with the existing visual language: soft gray/white backgrounds, deep navy/indigo primary actions, blue/purple accents, white rounded cards, subtle gradients/shadows, large touch targets, prominent stars, and responsive mobile-first layouts.
+
+For frontend changes:
+1. cd frontend
+2. npm install
+3. npm run dev
+4. npm test
+5. npm run build
+
+PHASE 12 AUTHENTICATION QUICK TEST
+----------------------------------
+1. Ensure DEMO_AUTH_SEED=true in your local environment.
+2. Start the backend: uvicorn backend.app.main:app --reload
+3. Start the frontend: cd frontend && npm install && npm run dev
+4. Open http://localhost:5173/login
+5. Admin demo: admin@reviewagentai.local / Admin@12345
+6. Business owner demo: owner@reviewagentai.local / Owner@12345
+7. After login, /account shows the authenticated role and linked business.
+8. API docs: http://127.0.0.1:8000/docs
+9. For production/shared environments set a long random AUTH_SECRET and DEMO_AUTH_SEED=false.

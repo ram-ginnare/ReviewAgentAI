@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bfe3ff"/>
+      <stop offset="0.62" stop-color="#eaf6ff"/>
+      <stop offset="1" stop-color="#f7fbff"/>
+    </linearGradient>
+    <linearGradient id="mountain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dcefff"/>
+      <stop offset="1" stop-color="#a9cce7"/>
+    </linearGradient>
+    <linearGradient id="mountainBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#edf7ff"/>
+      <stop offset="1" stop-color="#c7dfef"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="16"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <g fill="#fff" opacity=".72" filter="url(#blur)">
+    <ellipse cx="250" cy="170" rx="150" ry="34"/>
+    <ellipse cx="1350" cy="215" rx="190" ry="40"/>
+    <ellipse cx="790" cy="120" rx="120" ry="28"/>
+  </g>
+  <path d="M0 520 L230 250 L350 390 L530 170 L760 500 L970 235 L1160 420 L1370 185 L1600 510 V900 H0Z" fill="url(#mountainBack)"/>
+  <path d="M0 600 L210 330 L350 485 L540 215 L730 540 L965 305 L1130 480 L1375 240 L1600 570 V900 H0Z" fill="url(#mountain)"/>
+  <g fill="#fff" opacity=".92">
+    <path d="M210 330 L170 386 L210 368 L236 390 L265 348 L290 390 L350 485 L310 444 L278 456 L244 407 L214 432 L180 407Z"/>
+    <path d="M540 215 L492 284 L532 264 L565 298 L602 257 L638 318 L730 540 L670 474 L625 488 L590 416 L550 444 L505 380Z"/>
+    <path d="M965 305 L915 370 L955 351 L990 382 L1028 346 L1065 396 L1130 480 L1080 440 L1042 452 L1005 410 L972 430 L934 398Z"/>
+    <path d="M1375 240 L1328 310 L1365 290 L1400 320 L1434 282 L1475 335 L1600 570 L1518 490 L1470 505 L1430 430 L1390 460 L1350 390Z"/>
+  </g>
+  <path d="M0 670 C210 610 350 700 560 650 C800 590 980 690 1190 640 C1370 595 1490 650 1600 620 V900 H0Z" fill="#eaf5fb" opacity=".95"/>
+  <path d="M0 760 C230 700 390 790 620 735 C830 685 1020 780 1250 720 C1390 685 1510 730 1600 705 V900 H0Z" fill="#d6eaf5" opacity=".8"/>
+</svg>
