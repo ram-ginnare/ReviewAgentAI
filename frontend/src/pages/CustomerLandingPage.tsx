@@ -6,8 +6,6 @@ import type { Business, CustomerAccessResponse } from '../types/api'
 
 type AccessSource = 'nfc' | 'qr' | 'direct'
 
-const SOURCE_VALUES: ReadonlySet<AccessSource> = new Set(['nfc', 'qr', 'direct'])
-
 const socialLabels: Record<string, string> = {
   FACEBOOK: 'Facebook',
   INSTAGRAM: 'Instagram',
