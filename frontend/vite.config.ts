@@ -7,4 +7,7 @@ export default defineConfig({
     host: 'localhost',
     port: 5173,
   },
+  preview: {
+    allowedHosts: ['reviewagentai-1.onrender.com'],
+  },
 })
