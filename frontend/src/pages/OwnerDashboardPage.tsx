@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ApiClientError, ownerApi } from '../lib/api'
 import { clearAuth, getStoredUser, getAuthToken } from '../lib/auth'
-import type { BusinessSettings, OwnerDashboard, OwnerNotification, Plan, Subscription, BillingHistoryItem, SocialLink, AdvancedAnalytics } from '../types/api'
+import type { BusinessSettings, OwnerDashboard, OwnerNotification, Plan, Subscription, BillingHistoryItem, AdvancedAnalytics } from '../types/api'
 
 const money=(p:number)=>`₹${(p/100).toLocaleString('en-IN')}/mo`
 const fmt=(d:string)=>new Date(d).toLocaleString()
